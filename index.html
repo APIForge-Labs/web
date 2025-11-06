@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>APIForge Labs — Licencias para API</title>
+  <meta name="description" content="APIForge Labs — Licencias por endpoint para APIs." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">AF<span>Labs</span></div>
+      <div class="titles">
+        <h1>APIForge Labs</h1>
+        <p class="muted">Licencias por endpoint • Pago en criptomonedas</p>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="#endpoints">Endpoints</a>
+      <a href="buy.html" class="btn primary">Comprar Licencia</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Controla el acceso a tu API con licencias por endpoint</h2>
+      <p>APIForge Labs permite emitir licencias individuales por cada endpoint y gestionar acceso por cliente. Precio por licencia: <strong>USD 35.60</strong>.</p>
+      <a href="buy.html" class="cta">Obtener licencia</a>
+    </section>
+
+    <section id="endpoints" class="cards">
+      <article class="card">
+        <h3>POST /orders/create</h3>
+        <p class="muted">Crear órdenes — Licencia por endpoint.</p>
+        <div class="price">USD <strong>35.60</strong></div>
+        <div class="card-actions">
+          <a href="buy.html?prod=POST%20%2Forders%2Fcreate" class="btn">Seleccionar</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>POST /auth/token</h3>
+        <p class="muted">Emisión de tokens y autenticación.</p>
+        <div class="price">USD <strong>35.60</strong></div>
+        <div class="card-actions">
+          <a href="buy.html?prod=POST%20%2Fauth%2Ftoken" class="btn">Seleccionar</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>GET /players/get</h3>
+        <p class="muted">Consulta de jugadores y estadísticas.</p>
+        <div class="price">USD <strong>35.60</strong></div>
+        <div class="card-actions">
+          <a href="buy.html?prod=GET%20%2Fplayers%2Fget" class="btn">Seleccionar</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>POST /webhook/event</h3>
+        <p class="muted">Recepción de eventos — Webhooks.</p>
+        <div class="price">USD <strong>35.60</strong></div>
+        <div class="card-actions">
+          <a href="buy.html?prod=POST%20%2Fwebhook%2Fevent" class="btn">Seleccionar</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="how">
+      <h3>Cómo funciona</h3>
+      <ul class="muted">
+        <li>Cada endpoint puede requerir su licencia independiente.</li>
+        <li>Precio por licencia: <strong>USD 35.60</strong>.</li>
+        <li>Pago mediante criptomonedas (visualización de logos y procedimiento ilustrativo).</li>
+        <li>Al completar la operación se genera una factura y una clave de licencia descargable.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>APIForge Labs — © <span id="year"></span></div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

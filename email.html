@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Factura / Licencia — APIForge Labs</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:20px;color:#222}
+    .container{max-width:700px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+    header{background:linear-gradient(90deg,#0a6bff,#00d4ff);color:#fff;padding:20px}
+    header h1{margin:0;font-size:20px}
+    .content{padding:20px}
+    .license{font-family:monospace;background:#f0f7ff;padding:12px;border-left:4px solid #0061ff;border-radius:4px}
+    .muted{color:#666;font-size:13px}
+    footer{padding:14px;text-align:center;color:#666;font-size:13px;background:#fafafa}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header><h1>APIForge Labs — Factura de Licencia</h1></header>
+    <div class="content">
+      <p>Estimado cliente,</p>
+      <p>Adjuntamos la información de su compra y la clave de licencia para el acceso a los endpoints indicados.</p>
+
+      <p><strong>Factura ID:</strong> INV-XXXXXXXX</p>
+      <p><strong>Fecha de emisión:</strong> 05/11/2025 - 18:00</p>
+
+      <div class="license">
+        AF-LIC-<strong>4G7T-GH8K-LP92</strong>
+      </div>
+
+      <p class="muted">Incluya la clave en el header <code>X-AF-KEY: &lt;clave&gt;</code> para autenticar sus peticiones hacia nuestros endpoints.</p>
+
+      <p>Atentamente,<br>APIForge Labs — Equipo de Facturación</p>
+    </div>
+    <footer class="muted">Documento preparado para evaluación.</footer>
+  </div>
+</body>
+</html>

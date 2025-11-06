@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Comprar Licencia — APIForge Labs</title>
+  <meta name="description" content="Compra de licencias — APIForge Labs" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">AF<span>Labs</span></div>
+      <div class="titles">
+        <h1>APIForge Labs</h1>
+        <p class="muted">Comprar licencias</p>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="buy.html" class="btn primary">Comprar</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="buy-area">
+      <h2>Compra tu licencia</h2>
+      <p class="muted">Precio por licencia: <strong>USD 35.60</strong>. Introduce el correo al que quieres que se envíe la factura y la clave.</p>
+
+      <form id="buyForm" onsubmit="return false;" autocomplete="off">
+        <label for="email">Correo electrónico (destino):</label>
+        <input type="email" id="email" placeholder="tuemail@ejemplo.com" required />
+
+        <label for="product">Producto / Endpoint</label>
+        <input type="text" id="product" placeholder="POST /orders/create" />
+
+        <label for="qty">Cantidad</label>
+        <input type="number" id="qty" value="1" min="1" />
+
+        <div class="crypto-choices" aria-hidden="false">
+          <label><input type="radio" name="crypto" value="BTC" checked> Bitcoin (BTC)</label>
+          <label><input type="radio" name="crypto" value="ETH"> Ethereum (ETH)</label>
+          <label><input type="radio" name="crypto" value="USDT"> USDT</label>
+          <label><input type="radio" name="crypto" value="SOL"> Solana (SOL)</label>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="simulatePurchase()">Proceder</button>
+          <button class="btn" onclick="generateInvoiceOnly()">Descargar factura (HTML)</button>
+        </div>
+      </form>
+
+      <div id="result" class="result" style="display:none"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>APIForge Labs — © <span id="year2"></span></div>
+    <div class="muted small">Documento preparado para evaluación.</div>
+  </footer>
+
+<script>
+  document.getElementById('year2').textContent = new Date().getFullYear();
+
+  function generarLicencia() {
+    const parts = [];
+    for (let i=0;i<3;i++){
+      parts.push(Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(2,6));
+    }
+    return 'AF-LIC-' + parts.join('-');
+  }
+
+  // Fecha visible: ayer 18:00 (solo para mostrar en la factura)
+  function fechaSimuladaVisible() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    d.setHours(18,0,0,0);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const minu = String(d.getMinutes()).padStart(2,'0');
+    return `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
+  }
+
+  function buildInvoiceHTML(invId, licenseKey, email, product, qty, unit, total, issuedVisible) {
+    const itemsHtml = `<tr><td>${product}</td><td>${qty}</td><td>USD ${unit.toFixed(2)}</td><td class="right">USD ${(qty*unit).toFixed(2)}</td></tr>`;
+    return `<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Factura ${invId}</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;color:#222}
+.box{max-width:720px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+header{background:linear-gradient(90deg,#0061ff,#00d4ff);color:#fff;padding:16px}
+header h1{margin:0;font-size:18px}
+.content{padding:18px}
+.meta{display:flex;justify-content:space-between;gap:12px}
+.meta div{font-size:13px;color:#555}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:10px;border-bottom:1px solid #eee}
+th{background:#f7fbff;text-align:left}
+.right{text-align:right}
+.total{font-weight:800}
+.license{background:#f0f7ff;border-left:4px solid #0061ff;padding:12px;margin-top:12px;font-family:monospace}
+.footer-note{font-size:13px;color:#666;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="box">
+  <header><h1>APIForge Labs — FACTURA <small style="display:block;font-weight:400">ID: ${invId}</small></h1></header>
+  <div class="content">
+    <div class="meta"><div><strong>Facturado a:</strong><br>${email}</div><div><strong>Fecha emisión:</strong><br>${issuedVisible}</div></div>
+    <table><thead><tr><th>Concepto</th><th>Cant.</th><th>Unit.</th><th class="right">Total</th></tr></thead><tbody>${itemsHtml}</tbody>
+      <tfoot><tr><td colspan="3" class="right">TOTAL</td><td class="right total">USD ${total.toFixed(2)}</td></tr></tfoot></table>
+    <div class="license"><strong>Clave/licencia asociada:</strong><div style="margin-top:8px">${licenseKey}</div></div>
+    <p class="footer-note">Factura generada electrónicamente para fines de registro.</p>
+  </div>
+</div>
+</body>
+</html>`;  
+  }
+
+  function downloadBlob(filename, content, mime='text/html') {
+    const blob = new Blob([content], {type: mime + ';charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    a.remove(); URL.revokeObjectURL(url);
+  }
+
+  function simulatePurchase() {
+    const email = document.getElementById('email').value.trim();
+    if (!email) { alert('Introduce un correo válido'); return; }
+    const product = document.getElementById('product').value.trim() || 'Licencia API estándar';
+    const qty = parseInt(document.getElementById('qty').value) || 1;
+    const unit = 35.60;
+    const total = qty * unit;
+    const licenseKey = generarLicencia();
+    const invId = 'INV-' + new Date().getTime().toString().slice(-8);
+    const issuedVisible = fechaSimuladaVisible();
+
+    const invoiceHtml = buildInvoiceHTML(invId, licenseKey, email, product, qty, unit, total, issuedVisible);
+
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('result').innerHTML = `<p><strong>Compra procesada.</strong></p>
+      <p>Licencia generada: <code>${licenseKey}</code></p>
+      <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
+      <p>La factura está disponible para descarga.</p>
+      <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button></p>`;
+
+    window._lastInvoice = {invoiceHtml, invId, licenseKey, email};
+  }
+
+  function downloadInvoice() {
+    if (!window._lastInvoice) return alert('Genera primero la factura.');
+    downloadBlob(`invoice-${window._lastInvoice.invId}.html`, window._lastInvoice.invoiceHtml, 'text/html');
+  }
+
+  function generateInvoiceOnly() {
+    const email = document.getElementById('email').value.trim() || 'usuario@ejemplo.com';
+    const product = document.getElementById('product').value.trim() || 'Licencia API estándar';
+    const qty = parseInt(document.getElementById('qty').value) || 1;
+    const unit = 35.60;
+    const total = qty * unit;
+    const licenseKey = generarLicencia();
+    const invId = 'INV-' + new Date().getTime().toString().slice(-8);
+    const issuedVisible = fechaSimuladaVisible();
+    const invoiceHtml = buildInvoiceHTML(invId, licenseKey, email, product, qty, unit, total, issuedVisible);
+    downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
+  }
+
+  (function prefillFromQuery(){
+    const params = new URLSearchParams(location.search);
+    const p = params.get('prod') || '';
+    if (p) document.getElementById('product').value = decodeURIComponent(p);
+  })();
+</script>
+</body>
+</html>
