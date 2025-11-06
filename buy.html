@@ -32,7 +32,7 @@
         <input type="email" id="email" placeholder="tuemail@ejemplo.com" required />
 
         <label for="product">Producto / Endpoint</label>
-        <input type="text" id="product" placeholder="POST /orders/create" value="POST /orders/create" readonly />
+        <input type="text" id="product" value="POST /orders/create" readonly />
 
         <label for="qty">Cantidad</label>
         <input type="number" id="qty" value="1" min="1" readonly />
@@ -44,6 +44,7 @@
         <div class="actions">
           <button class="btn primary" onclick="simulatePurchase()">Proceder</button>
           <button class="btn" onclick="generateInvoiceOnly()">Descargar factura (HTML)</button>
+          <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button>
         </div>
       </form>
 
@@ -55,6 +56,10 @@
     <div>APIForge Labs — © <span id="year2"></span></div>
     <div class="muted small">Documento preparado para evaluación.</div>
   </footer>
+
+<!-- Librerías para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
   document.getElementById('year2').textContent = new Date().getFullYear();
@@ -98,7 +103,6 @@ th{background:#f7fbff}
 .right{text-align:right}
 .total{font-weight:800}
 .license{background:#f0f7ff;border-left:4px solid #0061ff;padding:12px;margin-top:12px;font-family:monospace}
-.footer-note{font-size:13px;color:#666;margin-top:10px}
 </style>
 </head>
 <body>
@@ -131,7 +135,6 @@ th{background:#f7fbff}
     <p><strong>Pago:</strong> USDT (BEP20)</p>
     <p><strong>Dirección envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
   </div>
-  <p class="footer-note">Factura generada electrónicamente para fines de registro.</p>
 </div>
 </div>
 </body>
@@ -164,7 +167,8 @@ th{background:#f7fbff}
       <p>Licencia generada: <code>${licenseKey}</code></p>
       <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
       <p>La factura está disponible para descarga.</p>
-      <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button></p>`;
+      <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button>
+      <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button></p>`;
 
     window._lastInvoice = {invoiceHtml, invId, licenseKey, email, qty, unit, total, issuedVisible};
   }
@@ -184,6 +188,32 @@ th{background:#f7fbff}
     const issuedVisible = fechaSimuladaVisible();
     const invoiceHtml = buildInvoiceHTML(invId, licenseKey, email, qty, unit, total, issuedVisible);
     downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
+  }
+
+  async function downloadInvoicePDF() {
+    if (!window._lastInvoice) return alert('Genera primero la factura.');
+    
+    const container = document.createElement('div');
+    container.innerHTML = window._lastInvoice.invoiceHtml;
+    container.style.width = '750px';
+    container.style.padding = '0';
+    container.style.background = '#fff';
+    document.body.appendChild(container);
+
+    const canvas = await html2canvas(container, {scale: 2});
+    const imgData = canvas.toDataURL('image/png');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pdfWidth - 40;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+    
+    pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+    pdf.save(`invoice-${window._lastInvoice.invId}.pdf`);
+
+    container.remove();
   }
 
   (function prefillFromQuery(){
