@@ -1,275 +1,239 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Comprar Licencia — APIForge Labs</title>
-  <meta name="description" content="Compra de licencias — APIForge Labs" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="site-header">
-    <div class="brand">
-      <div class="logo">AF<span>Labs</span></div>
-      <div class="titles">
-        <h1>APIForge Labs</h1>
-        <p class="muted">Comprar licencias</p>
-      </div>
-    </div>
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="buy.html" class="btn primary">Comprar</a>
-    </nav>
-  </header>
-
-  <main class="container">
-    <section class="buy-area">
-      <h2>Compra tu licencia</h2>
-      <p class="muted">Precio por licencia: <strong>USD 35.65</strong>. Introduce el correo al que quieres que se envíe la factura y la clave.</p>
-
-      <form id="buyForm" onsubmit="return false;" autocomplete="off">
-        <label for="email">Correo electrónico (destino):</label>
-        <input type="email" id="email" placeholder="tuemail@ejemplo.com" required />
-
-        <label for="qty">Cantidad de licencias:</label>
-        <input type="number" id="qty" value="1" min="1" />
-
-        <label for="issueDate">Fecha de emisión:</label>
-        <input type="datetime-local" id="issueDate" value="" />
-
-        <label for="method">Método permitido:</label>
-        <select id="method">
-          <option value="POST" selected>POST</option>
-          <option value="GET">GET</option>
-        </select>
-
-        <div class="crypto-choices">
-          <label><input type="radio" name="crypto" value="USDT" checked> USDT (BEP20)</label>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" onclick="simulatePurchase()">Proceder</button>
-          <button class="btn" onclick="generateInvoiceOnly()">Descargar factura (HTML)</button>
-          <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button>
-        </div>
-      </form>
-
-      <div id="result" class="result" style="display:none"></div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div>APIForge Labs — © <span id="year2"></span></div>
-    <div class="muted small">Documento preparado para evaluación.</div>
-  </footer>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Comprar Licencia — APIForge Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body{
+  font-family:'Roboto',sans-serif;
+  background:#0b0f1a;
+  margin:0;
+  color:#e0e0e0;
+}
+.container{
+  max-width:800px;
+  margin:30px auto;
+  background:#111827;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 8px 25px rgba(0,0,0,0.6);
+  padding:25px;
+}
+h2{
+  font-family:'Orbitron',sans-serif;
+  color:#00d4ff;
+  margin-bottom:20px;
+}
+label{
+  display:block;
+  margin-bottom:4px;
+  font-weight:500;
+}
+input, select{
+  width:100%;
+  padding:8px;
+  margin-bottom:12px;
+  border-radius:6px;
+  border:none;
+  background:#1f2937;
+  color:#fff;
+}
+button{
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+  padding:10px 16px;
+  font-weight:600;
+  transition:0.3s;
+}
+button:hover{opacity:0.9;}
+.btn.primary{background:#00d4ff;color:#111827;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;}
+.license-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.license-row label{flex:1}
+.result{
+  margin-top:20px;
+  padding:15px;
+  background:#1f2937;
+  border-left:4px solid #00d4ff;
+  border-radius:8px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Compra tu licencia</h2>
+  <form id="buyForm" onsubmit="return false;">
+    <label for="email">Correo electrónico:</label>
+    <input type="email" id="email" placeholder="tuemail@ejemplo.com" required />
+
+    <label for="qty">Cantidad de licencias:</label>
+    <input type="number" id="qty" value="1" min="1" onchange="updateLicenseMethods()" />
+
+    <label for="issueDate">Fecha de emisión:</label>
+    <input type="datetime-local" id="issueDate" value="" />
+
+    <div id="licenseMethodsContainer"></div>
+
+    <p><strong>Método de pago:</strong> USDT (BEP20)</p>
+    <p><strong>Dirección de envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
+
+    <div class="actions">
+      <button class="btn primary" onclick="simulatePurchase()">Proceder</button>
+      <button class="btn" onclick="generateInvoiceOnly()">Descargar factura (HTML)</button>
+      <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button>
+    </div>
+  </form>
+
+  <div id="result" class="result" style="display:none"></div>
+</div>
 
 <script>
-document.getElementById('year2').textContent = new Date().getFullYear();
 document.getElementById('issueDate').value = new Date().toISOString().slice(0,16);
 
 function generarLicencia() {
-  const parts = [];
-  for (let i=0;i<3;i++){
+  const parts=[];
+  for(let i=0;i<3;i++){
     parts.push(Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(2,6));
   }
-  return 'AF-LIC-' + parts.join('-');
+  return 'AF-LIC-'+parts.join('-');
 }
 
-function fechaSimuladaVisible() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  d.setHours(18,0,0,0);
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  const hh = String(d.getHours()).padStart(2,'0');
-  const minu = String(d.getMinutes()).padStart(2,'0');
-  return `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
+function updateLicenseMethods(){
+  const container=document.getElementById('licenseMethodsContainer');
+  const qty=parseInt(document.getElementById('qty').value)||1;
+  container.innerHTML='';
+  for(let i=0;i<qty;i++){
+    const div=document.createElement('div');
+    div.className='license-row';
+    div.innerHTML=`<label>Licencia #${i+1} - Método:</label>
+      <select class="method-selector">
+        <option value="POST" selected>POST</option>
+        <option value="GET">GET</option>
+      </select>`;
+    container.appendChild(div);
+  }
 }
+updateLicenseMethods();
 
-function buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method) {
-  let itemsHtml = '';
-  licenses.forEach((lic, index) => {
-    itemsHtml += `<tr>
-      <td>Licencia APIForge Premium #${index + 1} — Permanente, un solo uso ${method} endpoint</td>
+function buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible){
+  let itemsHtml='';
+  let licenseHtml='';
+  licenses.forEach((lic,index)=>{
+    itemsHtml+=`<tr>
+      <td>Licencia APIForge Premium #${index+1} — Permanente, un solo uso ${lic.method} endpoint</td>
       <td>1</td>
       <td>USD ${unit.toFixed(2)}</td>
       <td class="right">USD ${unit.toFixed(2)}</td>
     </tr>`;
+    licenseHtml+=`<p><strong>Licencia #${index+1}:</strong> ${lic.key} — Método: ${lic.method}</p>`;
   });
-
-  let licenseHtml = '';
-  licenses.forEach((lic, index) => {
-    licenseHtml += `<p><strong>Licencia #${index + 1}:</strong> ${lic}</p>`;
-  });
-
   return `<!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<title>Factura ${invId}</title>
+<head><meta charset="utf-8"><title>Factura ${invId}</title>
 <style>
-body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;color:#222}
-.box{max-width:750px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
-header{background:linear-gradient(90deg,#0061ff,#00d4ff);color:#fff;padding:16px}
-header h1{margin:0;font-size:18px}
-.content{padding:18px}
-.meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#555}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
-th{background:#f7fbff}
+body{font-family:'Roboto',sans-serif;background:#0b0f1a;color:#e0e0e0;padding:20px}
+.box{max-width:800px;margin:0 auto;background:#111827;border-radius:12px;padding:20px;box-shadow:0 8px 25px rgba(0,0,0,0.6)}
+header{background:linear-gradient(90deg,#0061ff,#00d4ff);color:#fff;padding:16px;border-radius:8px 8px 0 0;}
+header h1{margin:0;font-family:'Orbitron',sans-serif}
+.content{padding:20px}
+.meta{display:flex;justify-content:space-between;color:#a0a0a0;font-size:13px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:10px;border-bottom:1px solid #333;text-align:left}
+th{background:#1f2937}
 .right{text-align:right}
 .total{font-weight:800}
-.license{background:#f0f7ff;border-left:4px solid #0061ff;padding:12px;margin-top:12px;font-family:monospace}
+.license{background:#1f2937;border-left:4px solid #00d4ff;padding:12px;margin-top:12px;border-radius:6px;font-family:'Roboto',sans-serif;}
 </style>
 </head>
 <body>
 <div class="box">
 <header><h1>APIForge Labs — FACTURA <small style="display:block;font-weight:400">ID: ${invId}</small></h1></header>
 <div class="content">
-  <div class="meta"><div><strong>Facturado a:</strong><br>${email}</div><div><strong>Fecha emisión:</strong><br>${issuedVisible}</div></div>
-  <table>
-    <thead><tr><th>Concepto</th><th>Cant.</th><th>Unit.</th><th class="right">Total</th></tr></thead>
-    <tbody>
-      ${itemsHtml}
-    </tbody>
-    <tfoot>
-      <tr><td colspan="3" class="right">Subtotal</td><td class="right">USD ${total.toFixed(2)}</td></tr>
-      <tr><td colspan="3" class="right">Impuestos</td><td class="right">USD 0.00</td></tr>
-      <tr><td colspan="3" class="right total">TOTAL</td><td class="right total">USD ${total.toFixed(2)}</td></tr>
-    </tfoot>
-  </table>
-  <div class="license">
-    ${licenseHtml}
-    <p><strong>Producto:</strong> APIForge Premium</p>
-    <p><strong>Tipo de uso:</strong> Permanente, un solo uso</p>
-    <p><strong>Método permitido:</strong> ${method} (cualquier endpoint)</p>
-    <p><strong>Clave API:</strong> X-AF-KEY de cada licencia arriba</p>
-    <p><strong>Pago:</strong> USDT (BEP20)</p>
-    <p><strong>Dirección envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
-  </div>
+<div class="meta"><div><strong>Facturado a:</strong><br>${email}</div><div><strong>Fecha emisión:</strong><br>${issuedVisible}</div></div>
+<table>
+<thead><tr><th>Concepto</th><th>Cant.</th><th>Unit.</th><th class="right">Total</th></tr></thead>
+<tbody>${itemsHtml}</tbody>
+<tfoot>
+<tr><td colspan="3" class="right">Subtotal</td><td class="right">USD ${total.toFixed(2)}</td></tr>
+<tr><td colspan="3" class="right">Impuestos</td><td class="right">USD 0.00</td></tr>
+<tr><td colspan="3" class="right total">TOTAL</td><td class="right total">USD ${total.toFixed(2)}</td></tr>
+</tfoot>
+</table>
+<div class="license">
+${licenseHtml}
+<p><strong>Producto:</strong> APIForge Premium</p>
+<p><strong>Tipo de uso:</strong> Permanente, un solo uso</p>
+<p><strong>Pago:</strong> USDT (BEP20)</p>
+<p><strong>Dirección envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
+</div>
 </div>
 </div>
 </body>
 </html>`;
 }
 
-function downloadBlob(filename, content, mime='text/html') {
-  const blob = new Blob([content], {type: mime + ';charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  a.remove(); URL.revokeObjectURL(url);
+function downloadBlob(filename, content, mime='text/html'){
+  const blob=new Blob([content],{type:mime+';charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
 }
 
-function simulatePurchase() {
-  const email = document.getElementById('email').value.trim();
-  if (!email) { alert('Introduce un correo válido'); return; }
+function simulatePurchase(){
+  const email=document.getElementById('email').value.trim();
+  if(!email){alert('Introduce un correo válido');return;}
+  const qty=parseInt(document.getElementById('qty').value)||1;
+  const unit=35.65;
+  const total=qty*unit;
 
-  const qty = parseInt(document.getElementById('qty').value) || 1;
-  const unit = 35.65;
-  const total = qty * unit;
-  const method = document.getElementById('method').value;
+  const licenseElems=document.querySelectorAll('.method-selector');
+  const licenses=[];
+  licenseElems.forEach(sel=>{licenses.push({key:generarLicencia(),method:sel.value});});
 
-  const licenses = [];
-  for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
+  const invId='INV-'+new Date().getTime().toString().slice(-8);
+  const dateInput=document.getElementById('issueDate').value;
+  let issuedVisible=dateInput?new Date(dateInput).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date().toLocaleString('es-ES');
 
-  const invId = 'INV-' + new Date().getTime().toString().slice(-8);
+  const invoiceHtml=buildInvoiceHTML(invId,licenses,email,unit,total,issuedVisible);
 
-  // Fecha elegida por el usuario
-  const dateInput = document.getElementById('issueDate').value;
-  let issuedVisible;
-  if (dateInput) {
-    const d = new Date(dateInput);
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,'0');
-    const minu = String(d.getMinutes()).padStart(2,'0');
-    issuedVisible = `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
-  } else {
-    issuedVisible = fechaSimuladaVisible();
-  }
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').innerHTML=`<p><strong>Compra procesada.</strong></p>
+<p>Se generaron ${qty} licencia(s).</p>
+<p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
+<p>Disponible para descarga:</p>
+<p><button onclick="downloadInvoice()">Descargar HTML</button>
+<button onclick="downloadInvoicePDF()">Descargar PDF</button></p>`;
 
-  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method);
-
-  document.getElementById('result').style.display = 'block';
-  document.getElementById('result').innerHTML = `<p><strong>Compra procesada.</strong></p>
-    <p>Se generaron ${qty} licencia(s) con método ${method}.</p>
-    <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
-    <p>La factura está disponible para descarga.</p>
-    <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button>
-    <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button></p>`;
-
-  window._lastInvoice = {invoiceHtml, invId, licenses, email, qty, unit, total, issuedVisible, method};
+  window._lastInvoice={invoiceHtml,invId,licenses,email,unit,total,issuedVisible};
 }
 
-function downloadInvoice() {
-  if (!window._lastInvoice) return alert('Genera primero la factura.');
-  downloadBlob(`invoice-${window._lastInvoice.invId}.html`, window._lastInvoice.invoiceHtml, 'text/html');
-}
-
-function generateInvoiceOnly() {
-  const email = document.getElementById('email').value.trim() || 'usuario@ejemplo.com';
-  const qty = parseInt(document.getElementById('qty').value) || 1;
-  const unit = 35.65;
-  const total = qty * unit;
-  const method = document.getElementById('method').value;
-  const licenses = [];
-  for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
-  const invId = 'INV-' + new Date().getTime().toString().slice(-8);
-
-  const dateInput = document.getElementById('issueDate').value;
-  let issuedVisible;
-  if (dateInput) {
-    const d = new Date(dateInput);
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,'0');
-    const minu = String(d.getMinutes()).padStart(2,'0');
-    issuedVisible = `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
-  } else {
-    issuedVisible = fechaSimuladaVisible();
-  }
-
-  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method);
-  downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
-}
-
-async function downloadInvoicePDF() {
-  if (!window._lastInvoice) return alert('Genera primero la factura.');
-  const container = document.createElement('div');
-  container.innerHTML = window._lastInvoice.invoiceHtml;
-  container.style.width = '750px';
-  container.style.padding = '0';
-  container.style.background = '#fff';
+function downloadInvoice(){if(!window._lastInvoice)return alert('Genera primero la factura');downloadBlob(`invoice-${window._lastInvoice.invId}.html`,window._lastInvoice.invoiceHtml,'text/html');}
+function generateInvoiceOnly(){simulatePurchase();downloadInvoice();}
+async function downloadInvoicePDF(){
+  if(!window._lastInvoice)return alert('Genera primero la factura');
+  const container=document.createElement('div');
+  container.innerHTML=window._lastInvoice.invoiceHtml;
+  container.style.width='750px';container.style.background='#111827';
   document.body.appendChild(container);
-
-  const canvas = await html2canvas(container, {scale: 2});
-  const imgData = canvas.toDataURL('image/png');
-
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'pt', 'a4');
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const imgProps = pdf.getImageProperties(imgData);
-  const imgWidth = pdfWidth - 40;
-  const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-  pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+  const canvas=await html2canvas(container,{scale:2});
+  const imgData=canvas.toDataURL('image/png');
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF('p','pt','a4');
+  const pdfWidth=pdf.internal.pageSize.getWidth();
+  const imgProps=pdf.getImageProperties(imgData);
+  const imgWidth=pdfWidth-40;
+  const imgHeight=(imgProps.height*imgWidth)/imgProps.width;
+  pdf.addImage(imgData,'PNG',20,20,imgWidth,imgHeight);
   pdf.save(`invoice-${window._lastInvoice.invId}.pdf`);
-
   container.remove();
 }
-
-(function prefillFromQuery(){
-  const params = new URLSearchParams(location.search);
-  const p = params.get('prod') || '';
-  if (p) document.getElementById('product').value = decodeURIComponent(p);
-})();
 </script>
 </body>
 </html>
+
