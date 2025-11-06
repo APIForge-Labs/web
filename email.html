@@ -5,31 +5,124 @@
   <title>Factura / Licencia — APIForge Labs</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:20px;color:#222}
-    .container{max-width:700px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
-    header{background:linear-gradient(90deg,#0a6bff,#00d4ff);color:#fff;padding:20px}
-    header h1{margin:0;font-size:20px}
-    .content{padding:20px}
-    .license{font-family:monospace;background:#f0f7ff;padding:12px;border-left:4px solid #0061ff;border-radius:4px}
-    .muted{color:#666;font-size:13px}
-    footer{padding:14px;text-align:center;color:#666;font-size:13px;background:#fafafa}
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+    .container {
+      max-width: 750px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    header {
+      background: linear-gradient(90deg,#0a6bff,#00d4ff);
+      color: #fff;
+      padding: 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .content {
+      padding: 20px;
+    }
+    .details, .items {
+      font-size: 14px;
+      margin: 12px 0;
+    }
+    .items table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    .items th, .items td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .items th {
+      background: #f0f7ff;
+    }
+    .license {
+      font-family: monospace;
+      background: #f0f7ff;
+      padding: 16px;
+      border-left: 4px solid #0061ff;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .license p {
+      margin: 4px 0;
+    }
+    .muted {
+      color: #666;
+      font-size: 13px;
+    }
+    footer {
+      padding: 14px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      background: #fafafa;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <header><h1>APIForge Labs — Factura de Licencia</h1></header>
+    <header>
+      <h1>APIForge Labs — Factura de Licencia</h1>
+    </header>
     <div class="content">
       <p>Estimado cliente,</p>
       <p>Adjuntamos la información de su compra y la clave de licencia para el acceso a los endpoints indicados.</p>
 
-      <p><strong>Factura ID:</strong> INV-XXXXXXXX</p>
-      <p><strong>Fecha de emisión:</strong> 05/11/2025 - 18:00</p>
-
-      <div class="license">
-        AF-LIC-<strong>4G7T-GH8K-LP92</strong>
+      <div class="details">
+        <p><strong>Factura ID:</strong> INV-XXXXXXXX</p>
+        <p><strong>Fecha de emisión:</strong> 05/11/2025 - 18:00</p>
+        <p><strong>Método de pago:</strong> USDT (BEP20)</p>
+        <p><strong>Dirección de envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
       </div>
 
-      <p class="muted">Incluya la clave en el header <code>X-AF-KEY: &lt;clave&gt;</code> para autenticar sus peticiones hacia nuestros endpoints.</p>
+      <div class="items">
+        <table>
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Precio unitario</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Licencia APIForge Premium — Permanente, uso único POST endpoint</td>
+              <td>1</td>
+              <td>$35.65</td>
+              <td>$35.65</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>Subtotal:</strong> $35.65</p>
+        <p><strong>Impuestos:</strong> $0.00</p>
+        <p><strong>Total a pagar:</strong> $35.65</p>
+      </div>
+
+      <div class="license">
+        <p><strong>Licencia:</strong> AF-LIC-4G7T-GH8K-LP92</p>
+        <p><strong>Producto asociado:</strong> APIForge Premium</p>
+        <p><strong>Tipo de uso:</strong> Permanente, un solo uso</p>
+        <p><strong>Método permitido:</strong> POST (cualquier endpoint POST)</p>
+        <p><strong>Clave API:</strong> X-AF-KEY: AF-LIC-4G7T-GH8K-LP92</p>
+        <p><strong>Fecha de expiración:</strong> Ninguna (permanente)</p>
+      </div>
+
+      <p class="muted">Incluya la clave en el header para autenticar sus peticiones hacia nuestros endpoints.</p>
 
       <p>Atentamente,<br>APIForge Labs — Equipo de Facturación</p>
     </div>
