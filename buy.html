@@ -31,11 +31,11 @@
         <label for="email">Correo electrónico (destino):</label>
         <input type="email" id="email" placeholder="tuemail@ejemplo.com" required />
 
-        <label for="product">Producto / Endpoint</label>
-        <input type="text" id="product" value="POST /orders/create" readonly />
+        <label for="qty">Cantidad de licencias:</label>
+        <input type="number" id="qty" value="1" min="1" />
 
-        <label for="qty">Cantidad</label>
-        <input type="number" id="qty" value="1" min="1" readonly />
+        <label for="issueDate">Fecha de emisión:</label>
+        <input type="datetime-local" id="issueDate" value="" />
 
         <div class="crypto-choices">
           <label><input type="radio" name="crypto" value="USDT" checked> USDT (BEP20)</label>
@@ -57,35 +57,50 @@
     <div class="muted small">Documento preparado para evaluación.</div>
   </footer>
 
-<!-- Librerías para PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-  document.getElementById('year2').textContent = new Date().getFullYear();
+document.getElementById('year2').textContent = new Date().getFullYear();
+document.getElementById('issueDate').value = new Date().toISOString().slice(0,16);
 
-  function generarLicencia() {
-    const parts = [];
-    for (let i=0;i<3;i++){
-      parts.push(Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(2,6));
-    }
-    return 'AF-LIC-' + parts.join('-');
+function generarLicencia() {
+  const parts = [];
+  for (let i=0;i<3;i++){
+    parts.push(Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(2,6));
   }
+  return 'AF-LIC-' + parts.join('-');
+}
 
-  function fechaSimuladaVisible() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    d.setHours(18,0,0,0);
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2,'0');
-    const minu = String(d.getMinutes()).padStart(2,'0');
-    return `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
-  }
+function fechaSimuladaVisible() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  d.setHours(18,0,0,0);
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const minu = String(d.getMinutes()).padStart(2,'0');
+  return `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
+}
 
-  function buildInvoiceHTML(invId, licenseKey, email, qty, unit, total, issuedVisible) {
-    return `<!doctype html>
+function buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible) {
+  let itemsHtml = '';
+  licenses.forEach((lic, index) => {
+    itemsHtml += `<tr>
+      <td>Licencia APIForge Premium #${index + 1} — Permanente, un solo uso POST endpoint</td>
+      <td>1</td>
+      <td>USD ${unit.toFixed(2)}</td>
+      <td class="right">USD ${unit.toFixed(2)}</td>
+    </tr>`;
+  });
+
+  let licenseHtml = '';
+  licenses.forEach((lic, index) => {
+    licenseHtml += `<p><strong>Licencia #${index + 1}:</strong> ${lic}</p>`;
+  });
+
+  return `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -113,12 +128,7 @@ th{background:#f7fbff}
   <table>
     <thead><tr><th>Concepto</th><th>Cant.</th><th>Unit.</th><th class="right">Total</th></tr></thead>
     <tbody>
-      <tr>
-        <td>Licencia APIForge Premium — Permanente, un solo uso POST endpoint</td>
-        <td>${qty}</td>
-        <td>USD ${unit.toFixed(2)}</td>
-        <td class="right">USD ${(qty*unit).toFixed(2)}</td>
-      </tr>
+      ${itemsHtml}
     </tbody>
     <tfoot>
       <tr><td colspan="3" class="right">Subtotal</td><td class="right">USD ${total.toFixed(2)}</td></tr>
@@ -127,11 +137,11 @@ th{background:#f7fbff}
     </tfoot>
   </table>
   <div class="license">
-    <p><strong>Licencia:</strong> ${licenseKey}</p>
+    ${licenseHtml}
     <p><strong>Producto:</strong> APIForge Premium</p>
     <p><strong>Tipo de uso:</strong> Permanente, un solo uso</p>
     <p><strong>Método permitido:</strong> POST (cualquier endpoint POST)</p>
-    <p><strong>Clave API:</strong> X-AF-KEY: ${licenseKey}</p>
+    <p><strong>Clave API:</strong> X-AF-KEY de cada licencia arriba</p>
     <p><strong>Pago:</strong> USDT (BEP20)</p>
     <p><strong>Dirección envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
   </div>
@@ -139,88 +149,119 @@ th{background:#f7fbff}
 </div>
 </body>
 </html>`;
+}
+
+function downloadBlob(filename, content, mime='text/html') {
+  const blob = new Blob([content], {type: mime + ';charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+}
+
+function simulatePurchase() {
+  const email = document.getElementById('email').value.trim();
+  if (!email) { alert('Introduce un correo válido'); return; }
+
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const unit = 35.65;
+  const total = qty * unit;
+
+  const licenses = [];
+  for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
+
+  const invId = 'INV-' + new Date().getTime().toString().slice(-8);
+
+  // Fecha elegida por el usuario
+  const dateInput = document.getElementById('issueDate').value;
+  let issuedVisible;
+  if (dateInput) {
+    const d = new Date(dateInput);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const minu = String(d.getMinutes()).padStart(2,'0');
+    issuedVisible = `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
+  } else {
+    issuedVisible = fechaSimuladaVisible();
   }
 
-  function downloadBlob(filename, content, mime='text/html') {
-    const blob = new Blob([content], {type: mime + ';charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    a.remove(); URL.revokeObjectURL(url);
+  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible);
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').innerHTML = `<p><strong>Compra procesada.</strong></p>
+    <p>Se generaron ${qty} licencia(s).</p>
+    <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
+    <p>La factura está disponible para descarga.</p>
+    <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button>
+    <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button></p>`;
+
+  window._lastInvoice = {invoiceHtml, invId, licenses, email, qty, unit, total, issuedVisible};
+}
+
+function downloadInvoice() {
+  if (!window._lastInvoice) return alert('Genera primero la factura.');
+  downloadBlob(`invoice-${window._lastInvoice.invId}.html`, window._lastInvoice.invoiceHtml, 'text/html');
+}
+
+function generateInvoiceOnly() {
+  const email = document.getElementById('email').value.trim() || 'usuario@ejemplo.com';
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const unit = 35.65;
+  const total = qty * unit;
+  const licenses = [];
+  for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
+  const invId = 'INV-' + new Date().getTime().toString().slice(-8);
+
+  const dateInput = document.getElementById('issueDate').value;
+  let issuedVisible;
+  if (dateInput) {
+    const d = new Date(dateInput);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const minu = String(d.getMinutes()).padStart(2,'0');
+    issuedVisible = `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
+  } else {
+    issuedVisible = fechaSimuladaVisible();
   }
 
-  function simulatePurchase() {
-    const email = document.getElementById('email').value.trim();
-    if (!email) { alert('Introduce un correo válido'); return; }
-    const qty = 1;
-    const unit = 35.65;
-    const total = qty * unit;
-    const licenseKey = generarLicencia();
-    const invId = 'INV-' + new Date().getTime().toString().slice(-8);
-    const issuedVisible = fechaSimuladaVisible();
+  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible);
+  downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
+}
 
-    const invoiceHtml = buildInvoiceHTML(invId, licenseKey, email, qty, unit, total, issuedVisible);
+async function downloadInvoicePDF() {
+  if (!window._lastInvoice) return alert('Genera primero la factura.');
+  const container = document.createElement('div');
+  container.innerHTML = window._lastInvoice.invoiceHtml;
+  container.style.width = '750px';
+  container.style.padding = '0';
+  container.style.background = '#fff';
+  document.body.appendChild(container);
 
-    document.getElementById('result').style.display = 'block';
-    document.getElementById('result').innerHTML = `<p><strong>Compra procesada.</strong></p>
-      <p>Licencia generada: <code>${licenseKey}</code></p>
-      <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
-      <p>La factura está disponible para descarga.</p>
-      <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button>
-      <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button></p>`;
+  const canvas = await html2canvas(container, {scale: 2});
+  const imgData = canvas.toDataURL('image/png');
 
-    window._lastInvoice = {invoiceHtml, invId, licenseKey, email, qty, unit, total, issuedVisible};
-  }
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const imgProps = pdf.getImageProperties(imgData);
+  const imgWidth = pdfWidth - 40;
+  const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+  pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
+  pdf.save(`invoice-${window._lastInvoice.invId}.pdf`);
 
-  function downloadInvoice() {
-    if (!window._lastInvoice) return alert('Genera primero la factura.');
-    downloadBlob(`invoice-${window._lastInvoice.invId}.html`, window._lastInvoice.invoiceHtml, 'text/html');
-  }
+  container.remove();
+}
 
-  function generateInvoiceOnly() {
-    const email = document.getElementById('email').value.trim() || 'usuario@ejemplo.com';
-    const qty = 1;
-    const unit = 35.65;
-    const total = qty * unit;
-    const licenseKey = generarLicencia();
-    const invId = 'INV-' + new Date().getTime().toString().slice(-8);
-    const issuedVisible = fechaSimuladaVisible();
-    const invoiceHtml = buildInvoiceHTML(invId, licenseKey, email, qty, unit, total, issuedVisible);
-    downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
-  }
-
-  async function downloadInvoicePDF() {
-    if (!window._lastInvoice) return alert('Genera primero la factura.');
-    
-    const container = document.createElement('div');
-    container.innerHTML = window._lastInvoice.invoiceHtml;
-    container.style.width = '750px';
-    container.style.padding = '0';
-    container.style.background = '#fff';
-    document.body.appendChild(container);
-
-    const canvas = await html2canvas(container, {scale: 2});
-    const imgData = canvas.toDataURL('image/png');
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgWidth = pdfWidth - 40;
-    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-    
-    pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
-    pdf.save(`invoice-${window._lastInvoice.invId}.pdf`);
-
-    container.remove();
-  }
-
-  (function prefillFromQuery(){
-    const params = new URLSearchParams(location.search);
-    const p = params.get('prod') || '';
-    if (p) document.getElementById('product').value = decodeURIComponent(p);
-  })();
+(function prefillFromQuery(){
+  const params = new URLSearchParams(location.search);
+  const p = params.get('prod') || '';
+  if (p) document.getElementById('product').value = decodeURIComponent(p);
+})();
 </script>
 </body>
 </html>
