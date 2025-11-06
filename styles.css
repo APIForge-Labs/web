@@ -1,21 +1,20 @@
 /* ======================================================
-   APIForge Labs — Estilo profesional (v2)
+   APIForge Labs — Futuristic SaaS Design (Dark Glass UI)
    ====================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@600&display=swap');
+
 :root {
-  --primary-color: #0077ff;
-  --secondary-color: #0f172a;
-  --accent-color: #00c4b4;
-  --background: #f5f7fa;
-  --text-color: #1e293b;
-  --text-muted: #64748b;
-  --white: #ffffff;
-  --card-bg: #ffffff;
-  --border-color: #e2e8f0;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --radius: 12px;
+  --bg-dark: #0a0f1a;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --accent: #00f5ff;
+  --accent2: #8250ff;
+  --text-main: #e6e9ef;
+  --text-muted: #94a3b8;
+  --border-glow: rgba(0, 245, 255, 0.4);
+  --radius: 18px;
   --transition: all 0.3s ease;
-  --font-primary: "Inter", "Segoe UI", sans-serif;
+  --shadow: 0 0 25px rgba(0, 245, 255, 0.08);
 }
 
 * {
@@ -25,165 +24,207 @@
 }
 
 body {
-  font-family: var(--font-primary);
-  background-color: var(--background);
-  color: var(--text-color);
-  line-height: 1.6;
-  font-size: 16px;
+  background: radial-gradient(circle at 20% 20%, #121826, #05070d);
+  font-family: "Inter", sans-serif;
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
 /* ---------------- HEADER ---------------- */
-
 header {
-  background-color: var(--secondary-color);
-  color: var(--white);
-  padding: 1.5rem 2rem;
-  box-shadow: var(--shadow);
   position: sticky;
   top: 0;
+  background: rgba(10, 15, 26, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   z-index: 10;
 }
 
 header h1 {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-nav {
-  margin-top: 0.5rem;
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.5rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px var(--accent);
 }
 
 nav a {
-  color: var(--white);
+  color: var(--text-main);
+  margin-left: 1.5rem;
   text-decoration: none;
-  margin: 0 1rem;
   font-weight: 500;
-  opacity: 0.85;
   transition: var(--transition);
 }
 
 nav a:hover {
-  opacity: 1;
-  color: var(--accent-color);
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
 }
 
 /* ---------------- MAIN ---------------- */
-
 main {
-  max-width: 1000px;
-  margin: 2rem auto;
-  background-color: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 2.5rem;
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 2rem;
+}
+
+section {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--shadow);
-}
-
-h2 {
-  color: var(--primary-color);
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-p {
-  color: var(--text-muted);
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
-
-/* ---------------- LICENCIAS ---------------- */
-
-.endpoint-card {
-  background-color: var(--white);
-  border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  padding: 1.5rem;
-  margin-bottom: 1.2rem;
-  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  margin-bottom: 2rem;
   transition: var(--transition);
 }
 
-.endpoint-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+section:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
 }
 
-.endpoint-card h3 {
-  color: var(--secondary-color);
-  font-size: 1.1rem;
+/* ---------------- TITULOS ---------------- */
+h2 {
+  font-family: "Orbitron", sans-serif;
+  color: var(--accent);
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+h3 {
+  color: #fff;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
-.endpoint-card code {
-  background: #f1f5f9;
-  color: #334155;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
+p {
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* ---------------- ENDPOINT CARDS ---------------- */
+.endpoint-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.endpoint-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.endpoint-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.endpoint-icon {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, var(--accent2), var(--accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
 }
 
 .price {
+  color: var(--accent);
   font-weight: 700;
-  color: var(--primary-color);
-  margin-top: 0.6rem;
-}
-
-.endpoint-card a {
-  display: inline-block;
-  margin-top: 0.8rem;
-  text-decoration: none;
-  color: var(--accent-color);
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.endpoint-card a:hover {
-  text-decoration: underline;
+  margin-top: 0.4rem;
 }
 
 /* ---------------- BUTTONS ---------------- */
-
-button,
 .btn {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border: none;
-  padding: 0.7rem 1.3rem;
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
   border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: #fff;
   font-weight: 600;
-  cursor: pointer;
+  text-decoration: none;
   transition: var(--transition);
+  margin-top: 1rem;
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.2);
 }
 
-button:hover,
 .btn:hover {
-  background-color: #005ed1;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
 }
 
 /* ---------------- FOOTER ---------------- */
-
 footer {
-  background-color: var(--secondary-color);
-  color: var(--white);
   text-align: center;
-  padding: 1.5rem;
+  padding: 2rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 15, 26, 0.6);
   font-size: 0.9rem;
-  margin-top: 3rem;
+}
+
+/* ---------------- PAYMENT PAGE ---------------- */
+.crypto-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.crypto-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  padding: 1rem;
+  transition: var(--transition);
+}
+
+.crypto-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.crypto-item img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.8rem;
+}
+
+.crypto-item span {
+  color: var(--text-main);
+  font-weight: 500;
 }
 
 /* ---------------- RESPONSIVE ---------------- */
-
 @media (max-width: 768px) {
   main {
-    padding: 1.5rem;
-  }
-  nav a {
-    display: inline-block;
-    margin: 0.5rem;
+    padding: 1.2rem;
   }
   header h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+  nav a {
+    margin-left: 0.8rem;
+    font-size: 0.9rem;
   }
 }
