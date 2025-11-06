@@ -37,6 +37,12 @@
         <label for="issueDate">Fecha de emisión:</label>
         <input type="datetime-local" id="issueDate" value="" />
 
+        <label for="method">Método permitido:</label>
+        <select id="method">
+          <option value="POST" selected>POST</option>
+          <option value="GET">GET</option>
+        </select>
+
         <div class="crypto-choices">
           <label><input type="radio" name="crypto" value="USDT" checked> USDT (BEP20)</label>
         </div>
@@ -84,11 +90,11 @@ function fechaSimuladaVisible() {
   return `${dd}/${mm}/${yyyy} - ${hh}:${minu}`;
 }
 
-function buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible) {
+function buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method) {
   let itemsHtml = '';
   licenses.forEach((lic, index) => {
     itemsHtml += `<tr>
-      <td>Licencia APIForge Premium #${index + 1} — Permanente, un solo uso POST endpoint</td>
+      <td>Licencia APIForge Premium #${index + 1} — Permanente, un solo uso ${method} endpoint</td>
       <td>1</td>
       <td>USD ${unit.toFixed(2)}</td>
       <td class="right">USD ${unit.toFixed(2)}</td>
@@ -140,7 +146,7 @@ th{background:#f7fbff}
     ${licenseHtml}
     <p><strong>Producto:</strong> APIForge Premium</p>
     <p><strong>Tipo de uso:</strong> Permanente, un solo uso</p>
-    <p><strong>Método permitido:</strong> POST (cualquier endpoint POST)</p>
+    <p><strong>Método permitido:</strong> ${method} (cualquier endpoint)</p>
     <p><strong>Clave API:</strong> X-AF-KEY de cada licencia arriba</p>
     <p><strong>Pago:</strong> USDT (BEP20)</p>
     <p><strong>Dirección envío:</strong> 0x4c47F778F189B8c40691205C6E2c235Ec59e6D4b</p>
@@ -167,6 +173,7 @@ function simulatePurchase() {
   const qty = parseInt(document.getElementById('qty').value) || 1;
   const unit = 35.65;
   const total = qty * unit;
+  const method = document.getElementById('method').value;
 
   const licenses = [];
   for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
@@ -188,17 +195,17 @@ function simulatePurchase() {
     issuedVisible = fechaSimuladaVisible();
   }
 
-  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible);
+  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method);
 
   document.getElementById('result').style.display = 'block';
   document.getElementById('result').innerHTML = `<p><strong>Compra procesada.</strong></p>
-    <p>Se generaron ${qty} licencia(s).</p>
+    <p>Se generaron ${qty} licencia(s) con método ${method}.</p>
     <p>Factura total: <strong>USD ${total.toFixed(2)}</strong></p>
     <p>La factura está disponible para descarga.</p>
     <p><button class="btn" onclick="downloadInvoice()">Descargar factura (HTML)</button>
     <button class="btn" onclick="downloadInvoicePDF()">Descargar factura (PDF)</button></p>`;
 
-  window._lastInvoice = {invoiceHtml, invId, licenses, email, qty, unit, total, issuedVisible};
+  window._lastInvoice = {invoiceHtml, invId, licenses, email, qty, unit, total, issuedVisible, method};
 }
 
 function downloadInvoice() {
@@ -211,6 +218,7 @@ function generateInvoiceOnly() {
   const qty = parseInt(document.getElementById('qty').value) || 1;
   const unit = 35.65;
   const total = qty * unit;
+  const method = document.getElementById('method').value;
   const licenses = [];
   for (let i = 0; i < qty; i++) licenses.push(generarLicencia());
   const invId = 'INV-' + new Date().getTime().toString().slice(-8);
@@ -229,7 +237,7 @@ function generateInvoiceOnly() {
     issuedVisible = fechaSimuladaVisible();
   }
 
-  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible);
+  const invoiceHtml = buildInvoiceHTML(invId, licenses, email, unit, total, issuedVisible, method);
   downloadBlob(`invoice-${invId}.html`, invoiceHtml, 'text/html');
 }
 
